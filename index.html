@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Tools — Navina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-50: #EEEDFE;
+    --purple-100: #CECBF6;
+    --purple-200: #AFA9EC;
+    --purple-400: #7F77DD;
+    --purple-600: #534AB7;
+    --purple-700: #4B3DBF;
+    --purple-800: #3C3489;
+    --purple-900: #26215C;
+    --teal-50: #E1F5EE;
+    --teal-200: #5DCAA5;
+    --teal-400: #1D9E75;
+    --teal-600: #0F6E56;
+    --gray-50: #F8F7F5;
+    --gray-100: #F1EFE8;
+    --gray-200: #E4E2D8;
+    --gray-400: #888780;
+    --gray-600: #5F5E5A;
+    --gray-900: #1A1A18;
+    --white: #FFFFFF;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --shadow-md: 0 4px 16px rgba(38,33,92,0.1), 0 2px 6px rgba(38,33,92,0.06);
+    --shadow-lg: 0 12px 40px rgba(38,33,92,0.14), 0 4px 12px rgba(38,33,92,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% -10%, rgba(127,119,221,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(29,158,117,0.08) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(248,247,245,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 2rem; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-left { display: flex; align-items: center; gap: 8px; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+  .nav-logo-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--purple-600), var(--purple-800));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-logo-mark svg { width: 16px; height: 16px; fill: white; }
+  .nav-logo-text { font-size: 14px; font-weight: 600; color: var(--gray-900); letter-spacing: -0.01em; }
+  .nav-sep { color: var(--gray-200); font-size: 20px; font-weight: 300; display: none; }
+  .nav-section-label {
+    font-size: 13px; color: var(--gray-600); font-weight: 400;
+    opacity: 0; transform: translateX(-6px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .nav-section-label.show { opacity: 1; transform: translateX(0); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .nav-back {
+    display: none; align-items: center; gap: 5px;
+    font-size: 13px; color: var(--purple-600); font-weight: 500;
+    background: none; border: none; cursor: pointer;
+    padding: 4px 10px; border-radius: var(--radius-sm);
+    transition: background 0.15s;
+  }
+  .nav-back:hover { background: var(--purple-50); }
+  .nav-back.show { display: flex; }
+  .nav-back svg { width: 14px; height: 14px; stroke: var(--purple-600); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-badge {
+    font-size: 11px; font-weight: 500; color: var(--purple-600);
+    background: var(--purple-50); border: 1px solid var(--purple-100);
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* VIEWS */
+  .view { display: none; position: relative; z-index: 1; }
+  .view.active { display: block; }
+
+  /* ===== HOME ===== */
+  .home-page { max-width: 680px; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
+  .home-hero { text-align: center; margin-bottom: 3.5rem; }
+  .home-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--purple-600); margin-bottom: 1.25rem;
+  }
+  .home-eyebrow::before, .home-eyebrow::after { content: ''; width: 28px; height: 1px; background: var(--purple-200); }
+  .home-h1 {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 600; letter-spacing: -0.03em;
+    color: var(--purple-900); line-height: 1.1; margin-bottom: 1rem;
+  }
+  .home-h1 span { color: var(--purple-600); }
+  .home-sub { font-size: 17px; color: var(--gray-600); font-weight: 300; max-width: 400px; margin: 0 auto; }
+
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 500px) { .tool-grid { grid-template-columns: 1fr; } }
+
+  .tool-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-md);
+    padding: 2rem 1.75rem;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 1.25rem;
+    animation: fadeUp 0.4s ease both;
+    position: relative; overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  }
+  .tool-card:nth-child(2) { animation-delay: 0.07s; }
+  .tool-card.disabled { opacity: 0.55; cursor: not-allowed; }
+  .tool-card:not(.disabled):hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .tool-card.purple:not(.disabled):hover { border-color: var(--purple-200); }
+  .tool-card.teal:not(.disabled):hover   { border-color: var(--teal-200); }
+
+  .tool-soon {
+    position: absolute; top: 16px; right: 16px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--teal-600); background: var(--teal-50);
+    border: 1px solid #9FE1CB; padding: 3px 10px; border-radius: 20px;
+  }
+
+  .tool-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tool-icon.purple { background: var(--purple-50); border: 1px solid var(--purple-100); }
+  .tool-icon.teal   { background: var(--teal-50); border: 1px solid #9FE1CB; }
+  .tool-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tool-icon.purple svg { stroke: var(--purple-600); }
+  .tool-icon.teal svg   { stroke: var(--teal-600); }
+
+  .tool-name { font-size: 17px; font-weight: 600; color: var(--gray-900); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .tool-desc { font-size: 13px; color: var(--gray-400); line-height: 1.5; }
+
+  .tool-arrow {
+    margin-top: auto;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500;
+  }
+  .tool-arrow.purple { color: var(--purple-600); }
+  .tool-arrow.teal   { color: var(--teal-600); }
+  .tool-arrow svg { width: 14px; height: 14px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
+  .tool-arrow.purple svg { stroke: var(--purple-600); }
+  .tool-arrow.teal svg   { stroke: var(--teal-600); }
+  .tool-card:not(.disabled):hover .tool-arrow svg { transform: translateX(3px); }
+
+  /* ===== UTM BUILDER ===== */
+  .utm-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  .hero { text-align: center; margin-bottom: 3rem; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--purple-600); margin-bottom: 1rem;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 24px; height: 1px; background: var(--purple-200); }
+  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 600; letter-spacing: -0.03em; color: var(--purple-900); line-height: 1.15; margin-bottom: 0.75rem; }
+  h1 span { color: var(--purple-600); }
+  .hero-sub { font-size: 16px; color: var(--gray-600); font-weight: 300; }
+
+  .card {
+    background: var(--white); border-radius: var(--radius-xl);
+    border: 1px solid var(--gray-200); box-shadow: var(--shadow-md);
+    padding: 2rem; margin-bottom: 1.5rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .card:nth-child(2) { animation-delay: 0.05s; }
+  .card:nth-child(3) { animation-delay: 0.1s; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .card-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--purple-50); border: 1px solid var(--purple-100);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .card-icon svg { width: 16px; height: 16px; stroke: var(--purple-600); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+  .card-sub { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 540px) { .grid2 { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--gray-600); letter-spacing: 0.01em; }
+  .field-label span { color: var(--purple-400); margin-left: 2px; }
+  input[type=text], select {
+    height: 40px; padding: 0 12px;
+    border-radius: var(--radius-md); border: 1px solid var(--gray-200);
+    background: var(--gray-50); color: var(--gray-900);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    -webkit-appearance: none;
+  }
+  input[type=text]:hover, select:hover { border-color: var(--gray-400); background: var(--white); }
+  input[type=text]:focus, select:focus { outline: none; border-color: var(--purple-400); background: var(--white); box-shadow: 0 0 0 3px rgba(127,119,221,0.15); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+
+  .toggles-group-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .toggles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 480px) { .toggles-grid { grid-template-columns: 1fr; } }
+  .toggle-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border-radius: var(--radius-md); border: 1px solid var(--gray-200);
+    cursor: pointer; user-select: none; background: var(--gray-50);
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  .toggle-item:hover { border-color: var(--purple-200); background: var(--white); }
+  .toggle-item.active { border-color: var(--purple-400); background: var(--purple-50); box-shadow: 0 0 0 3px rgba(127,119,221,0.1); }
+  .pill { width: 34px; height: 20px; border-radius: 10px; background: var(--gray-200); position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .pill.on { background: var(--purple-600); }
+  .pill-knob { width: 14px; height: 14px; border-radius: 50%; background: white; position: absolute; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .pill.on .pill-knob { left: 17px; }
+  .toggle-name { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+  .toggle-src { font-size: 11px; color: var(--gray-400); font-family: 'DM Mono', monospace; }
+  .other-field { margin-top: 10px; display: none; }
+  .other-field.show { display: block; }
+
+  .btn-primary {
+    width: 100%; height: 48px; border-radius: var(--radius-md); border: none;
+    background: linear-gradient(135deg, var(--purple-600), var(--purple-800));
+    color: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; letter-spacing: -0.01em;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(75,61,191,0.35); margin-top: 0.5rem;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(75,61,191,0.45); }
+  .btn-primary:active { transform: scale(0.98) translateY(0); }
+  .btn-primary svg { width: 16px; height: 16px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  #outputArea { display: none; animation: fadeUp 0.4s ease both; }
+  #outputArea.show { display: block; }
+
+  .out-card { background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--gray-200); box-shadow: var(--shadow-md); margin-bottom: 1rem; overflow: hidden; }
+  .out-card-head { padding: 14px 20px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+  .out-card-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple-400); flex-shrink: 0; }
+  .out-card-title { font-size: 13px; font-weight: 600; color: var(--purple-800); flex: 1; }
+  .out-count { font-size: 11px; color: var(--purple-400); font-family: 'DM Mono', monospace; background: var(--purple-50); padding: 2px 8px; border-radius: 20px; }
+  .out-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .url-row { display: flex; align-items: flex-start; gap: 10px; background: var(--gray-50); border-radius: var(--radius-md); border: 1px solid var(--gray-100); padding: 10px 14px; transition: border-color 0.15s; }
+  .url-row:hover { border-color: var(--gray-200); }
+  .url-chip { font-size: 11px; font-weight: 600; color: var(--purple-600); background: var(--purple-50); border: 1px solid var(--purple-100); padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; min-width: 64px; text-align: center; }
+  .url-text { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--gray-600); word-break: break-all; line-height: 1.6; flex: 1; }
+  .url-text strong { color: var(--gray-900); font-weight: 500; }
+  .copy-btn { flex-shrink: 0; font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: var(--gray-600); background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 4px 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-top: 1px; }
+  .copy-btn:hover { border-color: var(--purple-200); color: var(--purple-600); background: var(--purple-50); }
+  .copy-btn.copied { border-color: var(--teal-400); color: var(--teal-600); background: var(--teal-50); }
+  .copy-all-row { display: flex; justify-content: flex-end; padding: 8px 16px 12px; border-top: 1px solid var(--gray-100); }
+  .btn-copy-all { font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: var(--purple-600); background: var(--purple-50); border: 1px solid var(--purple-100); border-radius: var(--radius-sm); padding: 5px 14px; cursor: pointer; transition: all 0.15s; }
+  .btn-copy-all:hover { background: var(--purple-100); border-color: var(--purple-200); }
+
+  .campaign-banner { background: linear-gradient(135deg, var(--purple-900), var(--purple-800)); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .campaign-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .campaign-value { font-family: 'DM Mono', monospace; font-size: 15px; color: white; font-weight: 500; }
+  .campaign-copy { flex-shrink: 0; font-size: 12px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 5px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+  .campaign-copy:hover { background: rgba(255,255,255,0.18); color: white; }
+
+  footer { position: relative; z-index: 1; text-align: center; padding: 2rem; font-size: 12px; color: var(--gray-400); }
+  footer a { color: var(--purple-400); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <div class="nav-logo" onclick="goHome()">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="4" r="3"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" fill-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-logo-text">Navina</span>
+    </div>
+    <span class="nav-sep" id="navSep">/</span>
+    <span class="nav-section-label" id="navLabel"></span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-back" id="navBack" onclick="goHome()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      All tools
+    </button>
+    <span class="nav-badge">Marketing Tools</span>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="view active" id="view-home">
+  <div class="home-page">
+    <div class="home-hero">
+      <div class="home-eyebrow">Marketing Tools</div>
+      <h2 class="home-h1">What are you<br><span>working on?</span></h2>
+      <p class="home-sub">Choose a tool to generate UTM tracking URLs for your campaigns.</p>
+    </div>
+    <div class="tool-grid">
+
+      <div class="tool-card teal" onclick="goTo('digital')">
+        <div class="tool-icon teal">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div>
+          <div class="tool-name">Digital Marketing</div>
+          <div class="tool-desc">Generate UTM links for paid ads, social campaigns, and always-on channels.</div>
+        </div>
+        <div class="tool-arrow teal">
+          Open tool
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+
+      <div class="tool-card purple" onclick="goTo('events')">
+        <div class="tool-icon purple">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="tool-name">Event Marketing</div>
+          <div class="tool-desc">Build UTM links for webinars, physical events, BDR outreach, and more.</div>
+        </div>
+        <div class="tool-arrow purple">
+          Open tool
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DIGITAL MARKETING -->
+<div class="view" id="view-digital">
+  <main class="utm-page">
+    <div class="hero">
+      <div class="hero-eyebrow">Digital Marketing</div>
+      <h1>Generate <span>tracking URLs</span><br>for every source</h1>
+      <p class="hero-sub">Select your source, enter the landing page, and get your full UTM string.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Campaign details</div>
+          <div class="card-sub">Select your traffic source and enter the destination URL</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label" for="dmSource">Source description <span>*</span></label>
+          <select id="dmSource" onchange="onDmSourceChange()">
+            <option value="">Select source...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="dmLandingPage">Landing page URL <span>*</span></label>
+          <input type="text" id="dmLandingPage" placeholder="https://navina.ai/page">
+        </div>
+      </div>
+
+      <div id="dmDynamicFields" style="margin-top:1rem; display:none;">
+        <div style="height:1px; background:var(--gray-100); margin-bottom:1rem;"></div>
+        <div class="toggles-group-label" style="margin-bottom:10px;">Dynamic placeholders — fill in any you want to override</div>
+        <div id="dmFieldsGrid" class="grid2"></div>
+      </div>
+    </div>
+
+    <div class="card" id="dmInfoCard" style="display:none; padding:1.25rem 1.5rem;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <div id="dmTrafficBadge" style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap;"></div>
+        <div id="dmChannelBadge" style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap;"></div>
+      </div>
+      <div style="font-size:12px; color:var(--gray-400); margin-bottom:8px;">Parameters that will be included:</div>
+      <div id="dmParamPreview" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--gray-600); line-height:1.9;"></div>
+    </div>
+
+    <button class="btn-primary" onclick="generateDigital()">
+      <svg viewBox="0 0 24 24"><polyline points="13 2 13 9 20 9"/><polygon points="22 12 13 2 2 2 2 22 22 22 22 12"/></svg>
+      Generate UTM URL
+    </button>
+
+    <div id="dmOutputArea" style="display:none; margin-top:2rem; animation: fadeUp 0.4s ease both;">
+      <div id="dmOutputSections"></div>
+    </div>
+  </main>
+</div>
+
+<!-- EVENT MARKETING -->
+<div class="view" id="view-events">
+  <main class="utm-page">
+    <div class="hero">
+      <div class="hero-eyebrow">Event Marketing</div>
+      <h1>Generate <span>tracking URLs</span><br>for every channel</h1>
+      <p class="hero-sub">Fill in your event details and get clean UTM links instantly.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Event details</div>
+          <div class="card-sub">These fields define your campaign identifier</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label" for="eventName">Event name <span>*</span></label>
+          <input type="text" id="eventName" placeholder="e.g. spring_summit">
+        </div>
+        <div class="field">
+          <label class="field-label" for="eventDate">Date (4 digits) <span>*</span></label>
+          <input type="text" id="eventDate" placeholder="e.g. 0426" maxlength="4">
+        </div>
+        <div class="field">
+          <label class="field-label" for="eventType">Event type <span>*</span></label>
+          <select id="eventType">
+            <option value="">Select type...</option>
+            <option value="w">Webinar</option>
+            <option value="p">Physical event</option>
+            <option value="pr">PR</option>
+            <option value="c">Content Download</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="landingPage">Landing page URL <span>*</span></label>
+          <input type="text" id="landingPage" placeholder="https://navina.ai/event">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Additional sources</div>
+          <div class="card-sub">Toggle the channels you want to include</div>
+        </div>
+      </div>
+
+      <div class="toggles-group-label">Email channels</div>
+      <div class="toggles-grid">
+        <div class="toggle-item" id="tog-sales" onclick="toggle('sales')">
+          <div class="pill" id="pill-sales"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Sales emails</div>
+            <div class="toggle-src">utm_source=sales</div>
+          </div>
+        </div>
+        <div class="toggle-item" id="tog-hp" onclick="toggle('hp')">
+          <div class="pill" id="pill-hp"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Health plan emails</div>
+            <div class="toggle-src">utm_term=hp1/hp2/hp3</div>
+          </div>
+        </div>
+        <div class="toggle-item" id="tog-bdr" onclick="toggle('bdr')">
+          <div class="pill" id="pill-bdr"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">BDR emails</div>
+            <div class="toggle-src">utm_source=bdr</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toggles-group-label" style="margin-top:14px;">Other sources</div>
+      <div class="toggles-grid">
+        <div class="toggle-item" id="tog-hosp" onclick="toggle('hosp')">
+          <div class="pill" id="pill-hosp"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Hospitology</div>
+            <div class="toggle-src">utm_source=hospitology</div>
+          </div>
+        </div>
+        <div class="toggle-item" id="tog-pete" onclick="toggle('pete')">
+          <div class="pill" id="pill-pete"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Crazy Pete</div>
+            <div class="toggle-src">utm_source=pete</div>
+          </div>
+        </div>
+        <div class="toggle-item" id="tog-other" onclick="toggle('other')">
+          <div class="pill" id="pill-other"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Other</div>
+            <div class="toggle-src">custom source</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="other-field" id="other-field">
+        <div class="field">
+          <label class="field-label" for="otherSource">Custom source name</label>
+          <input type="text" id="otherSource" placeholder="e.g. partner_newsletter">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="generate()">
+      <svg viewBox="0 0 24 24"><polyline points="13 2 13 9 20 9"/><polygon points="22 12 13 2 2 2 2 22 22 22 22 12"/></svg>
+      Generate UTM URLs
+    </button>
+
+    <div id="outputArea">
+      <div style="height:2rem;"></div>
+      <div class="campaign-banner">
+        <div>
+          <div class="campaign-label">Campaign string</div>
+          <div class="campaign-value" id="campaignPreview">—</div>
+        </div>
+        <button class="campaign-copy" onclick="copyText(document.getElementById('campaignPreview').textContent, this)">Copy</button>
+      </div>
+      <div id="outputSections"></div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Built for <a href="https://navina.ai" target="_blank">Navina</a> marketing team &middot; Marketing Tools
+</footer>
+
+<script>
+/* ---- NAVIGATION ---- */
+function goTo(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  const labels = { events: 'Event Marketing', digital: 'Digital Marketing' };
+  document.getElementById('navSep').style.display = 'inline';
+  const lbl = document.getElementById('navLabel');
+  lbl.textContent = labels[view] || '';
+  lbl.classList.add('show');
+  document.getElementById('navBack').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+  document.getElementById('navSep').style.display = 'none';
+  document.getElementById('navLabel').classList.remove('show');
+  document.getElementById('navBack').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---- UTM BUILDER ---- */
+const state = { sales: false, hp: false, bdr: false, hosp: false, pete: false, other: false };
+
+function toggle(key) {
+  state[key] = !state[key];
+  document.getElementById('pill-' + key).classList.toggle('on', state[key]);
+  document.getElementById('tog-' + key).classList.toggle('active', state[key]);
+  if (key === 'other') document.getElementById('other-field').classList.toggle('show', state[key]);
+}
+
+function enc(s) { return encodeURIComponent(s); }
+function buildURL(base, params) {
+  const b = base.replace(/\/+$/, '');
+  return b + (b.includes('?') ? '&' : '?') + params;
+}
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function urlRow(chip, url) {
+  const highlighted = url.replace(/(utm_[^=&]+=[^&]+)/g, (m) => {
+    const [k, v] = m.split('=');
+    return `${k}=<strong>${v}</strong>`;
+  });
+  return `<div class="url-row">
+    <span class="url-chip">${chip}</span>
+    <span class="url-text">${highlighted}</span>
+    <button class="copy-btn" onclick="copyText('${url.replace(/'/g,"\\'")}', this)">Copy</button>
+  </div>`;
+}
+
+function buildSection(title, rows) {
+  const allURLs = rows.map(r => r.url).join('\n');
+  return `<div class="out-card">
+    <div class="out-card-head">
+      <div class="out-card-dot"></div>
+      <div class="out-card-title">${title}</div>
+      <span class="out-count">${rows.length} URL${rows.length !== 1 ? 's' : ''}</span>
+    </div>
+    <div class="out-body">${rows.map(r => urlRow(r.chip, r.url)).join('')}</div>
+    <div class="copy-all-row">
+      <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
+    </div>
+  </div>`;
+}
+
+function generate() {
+  const name = document.getElementById('eventName').value.trim().replace(/\s+/g, '_');
+  const date = document.getElementById('eventDate').value.trim();
+  const type = document.getElementById('eventType').value;
+  const page = document.getElementById('landingPage').value.trim();
+
+  if (!name || !date || !type || !page) { alert('Please fill in all required fields.'); return; }
+
+  const campaign = `${name}_${type}_${date}`;
+  document.getElementById('campaignPreview').textContent = campaign;
+
+  const sections = [];
+  const reps = ['Deonte','Kee','Dustin','Orly','Greg','Lalon'];
+
+  sections.push(buildSection('Marketing email (HubSpot)',
+    ['e1','e2','e3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) }))));
+
+  if (state.bdr)
+    sections.push(buildSection('BDR emails',
+      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=bdr&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) }))));
+
+  if (state.sales)
+    sections.push(buildSection('Sales emails',
+      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=sales&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) }))));
+
+  if (state.hp)
+    sections.push(buildSection('Health plan emails (HubSpot)',
+      ['hp1','hp2','hp3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) }))));
+
+  sections.push(buildSection('LinkedIn',
+    ['event_page','organic'].map(m => ({ chip: m, url: buildURL(page, `utm_source=linkedin&utm_medium=${m}&utm_campaign=${enc(campaign)}`) }))));
+
+  const others = [];
+  if (state.hosp) others.push({ chip: 'hospitology', src: 'hospitology' });
+  if (state.pete) others.push({ chip: 'pete', src: 'pete' });
+  if (state.other) {
+    const custom = document.getElementById('otherSource').value.trim().replace(/\s+/g, '_');
+    if (custom) others.push({ chip: custom, src: custom });
+  }
+  if (others.length)
+    sections.push(buildSection('Other sources',
+      others.map(o => ({ chip: o.chip, url: buildURL(page, `utm_source=${enc(o.src)}&utm_medium=email&utm_campaign=${enc(campaign)}`) }))));
+
+  document.getElementById('outputSections').innerHTML = sections.join('');
+  const out = document.getElementById('outputArea');
+  out.classList.add('show');
+  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+/* ---- DIGITAL MARKETING DATA ---- */
+const DM_SOURCES = [
+  { desc: "Meta Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "facebook", utm_medium: "paid_media", utm_campaign: "{{campaign.name}}", utm_id: "{{campaign.id}}", utm_content: "{{adset.name}}", td_src: "facebook", td_med: "paid_media", td_cmp: "{{campaign.name}}", td_cmp_id: "{{campaign.id}}", td_grp: "{{adset.name}}", td_grp_id: "{{adset.id}}", td_ad: "{{ad.name}}", td_ad_id: "{{ad.id}}", td_plc: "{{placement}}", td_net: "{{site_source_name}}", hsa_net: "facebook", hsa_cam: "{{campaign.id}}", hsa_grp: "{{adset.id}}", hsa_ad: "{{ad.id}}", hsa_src: "{{site_source_name}}", hsa_ver: "3" } },
+  { desc: "LinkedIn Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "linkedin", utm_medium: "paid_media", utm_campaign: "{{CAMPAIGN_NAME}}", utm_id: "{{CAMPAIGN_ID}}", utm_content: "{{AD_SET_NAME}}", td_src: "linkedin", td_med: "paid_media", td_cmp: "{{CAMPAIGN_NAME}}", td_cmp_id: "{{CAMPAIGN_ID}}", td_grp: "{{AD_SET_NAME}}", td_grp_id: "{{AD_SET_ID}}", td_ad: "{{AD_NAME}}", td_ad_id: "{{AD_ID}}", hsa_net: "linkedin", hsa_acc: "{{ACCOUNT_ID}}", hsa_cam: "{{CAMPAIGN_ID}}", hsa_grp: "{{AD_SET_ID}}", hsa_ad: "{{AD_ID}}", hsa_ver: "3" } },
+  { desc: "TikTok Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "tiktok", utm_medium: "paid_media", utm_campaign: "__CAMPAIGN_NAME__", utm_id: "__CAMPAIGN_ID__", utm_content: "__AID_NAME__", td_src: "tiktok", td_med: "paid_media", td_cmp: "__CAMPAIGN_NAME__", td_cmp_id: "__CAMPAIGN_ID__", td_grp: "__AID_NAME__", td_grp_id: "__AID__", td_ad: "__CID_NAME__", td_ad_id: "__CID__", td_plc: "__PLACEMENT__" } },
+  { desc: "Twitter Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "twitter", utm_medium: "paid_media", utm_campaign: "[CAMPAIGN NAME]", utm_id: "[CAMPAIGN ID]", utm_content: "[ADSET NAME]", td_src: "twitter", td_med: "paid_media", td_cmp: "[CAMPAIGN NAME]", td_cmp_id: "[CAMPAIGN ID]", td_grp: "[ADSET NAME]", td_grp_id: "[ADSET ID]", td_ad: "[AD NAME]", td_ad_id: "[AD ID]", td_net: "x", td_dev: "x" } },
+  { desc: "Reddit Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "reddit", utm_medium: "paid_media", utm_campaign: "[CAMPAIGN NAME]", utm_id: "{{CAMPAIGN_ID}}", utm_content: "{{ADGROUP_NAME}}", td_src: "reddit", td_med: "paid_media", td_cmp: "[CAMPAIGN NAME]", td_cmp_id: "{{CAMPAIGN_ID}}", td_grp: "{{ADGROUP_NAME}}", td_grp_id: "{{ADGROUP_ID}}", td_ad: "{{AD_NAME}}", td_ad_id: "{{AD_ID}}", td_plc: "{{POST_ID}}", td_dev: "{{DEVICE_GROUP}}", td_geo: "{{COUNTRY}}" } },
+  { desc: "Quora Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "quora", utm_medium: "paid_media", utm_campaign: "{{campaign.name}}", utm_id: "{{campaign.id}}", utm_content: "{{adset.name}}", td_src: "quora", td_med: "paid_media", td_cmp: "{{campaign.name}}", td_cmp_id: "{{campaign.id}}", td_grp: "{{adset.name}}", td_grp_id: "{{adset.id}}", td_ad: "{{ad.name}}", td_ad_id: "{{ad.id}}" } },
+  { desc: "Pinterest Ads", traffic: "Paid", channel: "Social Media", params: { utm_source: "pinterest", utm_medium: "paid_media", utm_campaign: "{campaign_name}", utm_id: "{campaignid}", utm_content: "{ad_group_name}", td_src: "pinterest", td_med: "paid_media", td_cmp: "{campaign_name}", td_cmp_id: "{campaignid}", td_grp: "{ad_group_name}", td_grp_id: "{adgroupid}", td_ad: "{creative_id}", td_ad_id: "{adid}", td_dev: "{device}" } },
+  { desc: "Outbrain", traffic: "Paid", channel: "Discovery", params: { utm_source: "outbrain", utm_medium: "discovery", utm_campaign: "{{campaign_name}}", utm_id: "{{campaign_id}}", utm_content: "{{publisher_name}}", td_src: "outbrain", td_med: "discovery", td_cmp: "{{campaign_name}}", td_cmp_id: "{{campaign_id}}", td_grp: "{{publisher_name}}", td_grp_id: "{{publisher_id}}", td_ad: "{{ad_title}}", td_ad_id: "{{ad_id}}", td_plc: "{{section_name}}_{{section_id}}" } },
+  { desc: "Taboola", traffic: "Paid", channel: "Discovery", params: { utm_source: "taboola", utm_medium: "discovery", utm_campaign: "{campaign_name}", utm_id: "{campaign_id}", utm_content: "{site}", td_src: "taboola", td_med: "discovery", td_cmp: "{campaign_name}", td_cmp_id: "{campaign_id}", td_grp: "{site}", td_grp_id: "{site_id}", td_ad: "{title}", td_ad_id: "{campaign_item_id}", td_plc: "{site_domain}", td_dev: "{platform}" } },
+  { desc: "Google Ads", traffic: "Paid", channel: "Search Engine", params: { utm_source: "google", utm_medium: "cpc", utm_campaign: "[CAMPAIGN NAME]", utm_id: "{campaignid}", utm_content: "[ADGROUP NAME]", utm_term: "{keyword}", td_src: "google", td_med: "cpc", td_cmp: "[CAMPAIGN NAME]", td_cmp_id: "{campaignid}", td_grp: "[ADGROUP NAME]", td_grp_id: "{adgroupid}", td_ad: "{creative}", td_ad_id: "{creative}", td_kw: "{keyword}", td_kw_id: "{targetid}", td_kw_mt: "{matchtype}", td_plc: "{placement}", td_net: "{network}", td_dev: "{device}", td_geo: "{loc_physical_ms}", td_int: "{loc_interest_ms}", hsa_net: "google", hsa_cam: "{campaignid}", hsa_grp: "{adgroupid}", hsa_ad: "{creative}", hsa_kw: "{keyword}", hsa_tgt: "{targetid}", hsa_mt: "{matchtype}", hsa_src: "adwords", hsa_ver: "3" } },
+  { desc: "Microsoft Ads", traffic: "Paid", channel: "Search Engine", params: { utm_source: "bing", utm_medium: "cpc", utm_campaign: "{Campaign}", utm_id: "{CampaignId}", utm_content: "{AdGroup}", utm_term: "{keyword:default}", td_src: "bing", td_med: "cpc", td_cmp: "{Campaign}", td_cmp_id: "{CampaignId}", td_grp: "{AdGroup}", td_grp_id: "{AdGroupId}", td_ad: "{AdId}", td_ad_id: "{AdId}", td_kw: "{keyword:default}", td_kw_id: "{TargetId}", td_kw_mt: "{MatchType}", td_sq: "{QueryString}", td_net: "{Network}", td_dev: "{Device}", td_geo: "{loc_physical_ms}", td_int: "{loc_interest_ms}" } },
+  { desc: "Yandex Ads", traffic: "Paid", channel: "Search Engine", params: { utm_source: "yandex", utm_medium: "cpc", utm_campaign: "{campaign_name}", utm_id: "{campaign_id}", utm_content: "{gbid}", utm_term: "{keyword}", td_src: "yandex", td_med: "cpc", td_cmp: "{campaign_name}", td_cmp_id: "{campaign_id}", td_grp: "{gbid}", td_grp_id: "{gbid}", td_ad: "{creative_id}", td_ad_id: "{ad_id}", td_kw: "{keyword}", td_kw_id: "{phrase_id}", td_kw_mt: "{match_type}", td_plc: "{source}", td_net: "{source_type}", td_dev: "{device_type}", td_geo: "{region_id}" } },
+  { desc: "Facebook Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "facebook", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "facebook", td_med: "social_media" } },
+  { desc: "Instagram Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "instagram", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "instagram", td_med: "social_media" } },
+  { desc: "LinkedIn Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "linkedin", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "linkedin", td_med: "social_media" } },
+  { desc: "TikTok Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "tiktok", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "tiktok", td_med: "social_media" } },
+  { desc: "Twitter Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "twitter", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "twitter", td_med: "social_media" } },
+  { desc: "Reddit Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "reddit", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "reddit", td_med: "social_media" } },
+  { desc: "YouTube Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "youtube", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "youtube", td_med: "social_media" } },
+  { desc: "Pinterest Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "pinterest", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "pinterest", td_med: "social_media" } },
+  { desc: "WhatsApp", traffic: "Organic", channel: "Social Media", params: { utm_source: "whatsapp", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "whatsapp", td_med: "social_media" } },
+  { desc: "Quora Social Media", traffic: "Organic", channel: "Social Media", params: { utm_source: "quora", utm_medium: "social_media", utm_campaign: "[POST NAME]", td_src: "quora", td_med: "social_media" } },
+  { desc: "HubSpot Emails", traffic: "Organic", channel: "Email", params: { utm_source: "hubspot", utm_medium: "email", utm_campaign: "[EMAIL NAME]", td_src: "hubspot", td_med: "email" } },
+  { desc: "Google Search", traffic: "Organic", channel: "Search Engine", params: { utm_source: "google", utm_medium: "organic", td_src: "google", td_med: "organic" } },
+  { desc: "Yahoo Search", traffic: "Organic", channel: "Search Engine", params: { utm_source: "yahoo", utm_medium: "organic", td_src: "yahoo", td_med: "organic" } },
+  { desc: "DuckDuckGo Search", traffic: "Organic", channel: "Search Engine", params: { utm_source: "duckduckgo", utm_medium: "organic", td_src: "duckduckgo", td_med: "organic" } },
+  { desc: "Yandex Search", traffic: "Organic", channel: "Search Engine", params: { utm_source: "yandex", utm_medium: "organic", td_src: "yandex", td_med: "organic" } },
+  { desc: "Referrals (Other Websites)", traffic: "Organic", channel: "Referral", params: { utm_source: "{website domain}", utm_medium: "referral" } },
+  { desc: "Direct Traffic", traffic: "Organic", channel: "Direct", params: { utm_source: "direct", utm_medium: "none" } }
+];
+
+/* Find all dynamic placeholders in a params object */
+function getPlaceholders(params) {
+  const found = new Set();
+  for (const v of Object.values(params)) {
+    if (!v) continue;
+    const matches = v.match(/(\{\{[^}]+\}\}|\{[^}]+\}|\[[^\]]+\]|__[^_]+__)/g);
+    if (matches) matches.forEach(m => found.add(m));
+  }
+  return [...found];
+}
+
+function isDynamic(val) {
+  return /(\{\{[^}]+\}\}|\{[^}]+\}|\[[^\]]+\]|__[^_]+__)/.test(val);
+}
+
+/* Populate dropdown on page load */
+(function initDmDropdown() {
+  const sel = document.getElementById('dmSource');
+  let lastChannel = '';
+  DM_SOURCES.forEach((s, i) => {
+    if (s.channel !== lastChannel) {
+      const og = document.createElement('optgroup');
+      og.label = s.channel;
+      sel.appendChild(og);
+      lastChannel = s.channel;
+    }
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = s.desc;
+    sel.lastElementChild.appendChild(opt);
+  });
+})();
+
+function onDmSourceChange() {
+  const idx = document.getElementById('dmSource').value;
+  const infoCard = document.getElementById('dmInfoCard');
+  const dynFields = document.getElementById('dmDynamicFields');
+  document.getElementById('dmOutputArea').style.display = 'none';
+
+  if (idx === '') { infoCard.style.display = 'none'; dynFields.style.display = 'none'; return; }
+
+  const src = DM_SOURCES[parseInt(idx)];
+
+  // Info badges
+  const tBadge = document.getElementById('dmTrafficBadge');
+  const cBadge = document.getElementById('dmChannelBadge');
+  const tColors = { Paid: ['#EEEDFE','#534AB7'], Organic: ['#E1F5EE','#0F6E56'] };
+  const tc = tColors[src.traffic] || ['#F1EFE8','#5F5E5A'];
+  tBadge.style.background = tc[0]; tBadge.style.color = tc[1]; tBadge.textContent = src.traffic;
+  cBadge.style.background = '#F1EFE8'; cBadge.style.color = '#5F5E5A'; cBadge.textContent = src.channel;
+
+  // Param preview — only non-empty
+  const preview = document.getElementById('dmParamPreview');
+  preview.innerHTML = Object.entries(src.params)
+    .filter(([, v]) => v)
+    .map(([k, v]) => {
+      const vHtml = isDynamic(v)
+        ? `<span style="color:var(--purple-600);font-weight:500;">${v}</span>`
+        : `<span style="color:var(--gray-900);">${v}</span>`;
+      return `<span style="color:var(--gray-400);">${k}</span>=<span>${vHtml}</span>`;
+    })
+    .join('<br>');
+  infoCard.style.display = 'block';
+
+  // Dynamic override fields
+  const placeholders = getPlaceholders(src.params);
+  const grid = document.getElementById('dmFieldsGrid');
+  grid.innerHTML = '';
+  if (placeholders.length > 0) {
+    placeholders.forEach(ph => {
+      const safeId = 'dmpf_' + ph.replace(/[^a-zA-Z0-9]/g, '_');
+      const div = document.createElement('div');
+      div.className = 'field';
+      div.innerHTML = `<label class="field-label" for="${safeId}" style="font-family:'DM Mono',monospace;font-size:11px;">${ph}</label>
+        <input type="text" id="${safeId}" placeholder="leave blank to keep as-is" data-placeholder="${ph}">`;
+      grid.appendChild(div);
+    });
+    dynFields.style.display = 'block';
+  } else {
+    dynFields.style.display = 'none';
+  }
+}
+
+function generateDigital() {
+  const idx = document.getElementById('dmSource').value;
+  const page = document.getElementById('dmLandingPage').value.trim();
+  if (idx === '' || !page) { alert('Please select a source and enter a landing page URL.'); return; }
+
+  const src = DM_SOURCES[parseInt(idx)];
+
+  // Build override map from filled-in dynamic fields
+  const overrides = {};
+  document.querySelectorAll('#dmFieldsGrid input[data-placeholder]').forEach(inp => {
+    if (inp.value.trim()) overrides[inp.dataset.placeholder] = inp.value.trim();
+  });
+
+  // Apply overrides to param values
+  function applyOverrides(val) {
+    let out = val;
+    for (const [ph, rep] of Object.entries(overrides)) {
+      out = out.split(ph).join(rep);
+    }
+    return out;
+  }
+
+  const resolvedParams = {};
+  for (const [k, v] of Object.entries(src.params)) {
+    if (v) resolvedParams[k] = applyOverrides(v);
+  }
+
+  // Split into UTM params and tracking params (td_*, hsa_*)
+  const utmParams = Object.fromEntries(Object.entries(resolvedParams).filter(([k]) => k.startsWith('utm_')));
+  const tdParams  = Object.fromEntries(Object.entries(resolvedParams).filter(([k]) => k.startsWith('td_')));
+  const hsaParams = Object.fromEntries(Object.entries(resolvedParams).filter(([k]) => k.startsWith('hsa_')));
+
+  function paramsToString(obj) {
+    return Object.entries(obj).map(([k, v]) => `${k}=${v}`).join('&');
+  }
+
+  const sections = [];
+
+  // Main URL (UTM only)
+  const utmStr = paramsToString(utmParams);
+  if (utmStr) {
+    const url = buildURL(page, utmStr);
+    sections.push(dmSection('UTM parameters', [{ chip: 'UTM URL', url }]));
+  }
+
+  // td_ tracking params
+  const tdStr = paramsToString(tdParams);
+  if (tdStr) {
+    const url = buildURL(page, Object.entries({...utmParams, ...tdParams}).map(([k,v]) => `${k}=${v}`).join('&'));
+    sections.push(dmSection('Full URL with td_ tracking', [{ chip: 'Full URL', url }]));
+  }
+
+  // hsa_ params (HubSpot / HS Ads)
+  const hsaStr = paramsToString(hsaParams);
+  if (hsaStr) {
+    const url = buildURL(page, Object.entries({...utmParams, ...hsaParams}).map(([k,v]) => `${k}=${v}`).join('&'));
+    sections.push(dmSection('Full URL with hsa_ tracking', [{ chip: 'HSA URL', url }]));
+  }
+
+  document.getElementById('dmOutputSections').innerHTML = sections.join('');
+  const out = document.getElementById('dmOutputArea');
+  out.style.display = 'block';
+  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function dmSection(title, rows) {
+  const allURLs = rows.map(r => r.url).join('\n');
+  const rowsHtml = rows.map(r => {
+    const safe = r.url.replace(/'/g, "\\'");
+    const highlighted = r.url.replace(/((?:utm|td|hsa)_[^=&]+=[^&]+)/g, (m) => {
+      const eqIdx = m.indexOf('=');
+      const k = m.slice(0, eqIdx);
+      const v = m.slice(eqIdx + 1);
+      const isDyn = isDynamic(decodeURIComponent(v));
+      const vStyle = isDyn ? 'color:var(--purple-400);font-weight:500;' : 'color:var(--gray-900);font-weight:500;';
+      return `<span style="color:var(--gray-400);">${k}</span>=<span style="${vStyle}">${v}</span>`;
+    });
+    return `<div class="url-row">
+      <span class="url-chip">${r.chip}</span>
+      <span class="url-text" style="font-size:11px;">${highlighted}</span>
+      <button class="copy-btn" onclick="copyText('${safe}', this)">Copy</button>
+    </div>`;
+  }).join('');
+  return `<div class="out-card">
+    <div class="out-card-head">
+      <div class="out-card-dot"></div>
+      <div class="out-card-title">${title}</div>
+      <span class="out-count">${rows.length} URL${rows.length !== 1 ? 's' : ''}</span>
+    </div>
+    <div class="out-body">${rowsHtml}</div>
+    <div class="copy-all-row">
+      <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
+    </div>
+  </div>`;
+}
+</script>
+</body>
+</html>
