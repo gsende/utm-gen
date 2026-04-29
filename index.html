@@ -270,9 +270,13 @@
   .copy-btn { flex-shrink: 0; font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: var(--gray-600); background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 4px 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-top: 1px; }
   .copy-btn:hover { border-color: var(--purple-200); color: var(--purple-600); background: var(--purple-50); }
   .copy-btn.copied { border-color: var(--teal-400); color: var(--teal-600); background: var(--teal-50); }
-  .copy-all-row { display: flex; justify-content: flex-end; padding: 8px 16px 12px; border-top: 1px solid var(--gray-100); }
+  .copy-all-row { display: flex; justify-content: flex-end; padding: 8px 16px 12px; border-top: 1px solid var(--gray-100); gap: 8px; }
   .btn-copy-all { font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: var(--purple-600); background: var(--purple-50); border: 1px solid var(--purple-100); border-radius: var(--radius-sm); padding: 5px 14px; cursor: pointer; transition: all 0.15s; }
   .btn-copy-all:hover { background: var(--purple-100); border-color: var(--purple-200); }
+  .btn-save-log { font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: var(--teal-600); background: var(--teal-50); border: 1px solid #9FE1CB; border-radius: var(--radius-sm); padding: 5px 14px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+  .btn-save-log:hover { background: #9FE1CB; }
+  .btn-save-log.saving { opacity: 0.6; pointer-events: none; }
+  .btn-save-log.saved { color: var(--teal-800); background: var(--teal-200); border-color: var(--teal-400); }
 
   .campaign-banner { background: linear-gradient(135deg, var(--purple-900), var(--purple-800)); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .campaign-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
@@ -604,8 +608,49 @@ function urlRow(chip, url) {
   </div>`;
 }
 
-function buildSection(title, rows) {
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzAZiqC_Y-O6jJpzxBvYBzIrdm8wFJuyEZR1ODJrKEmpQQ6eyJ3seNd6nKbzQdtvD1umA/exec';
+
+function parseUTMParams(url) {
+  const p = {};
+  try { new URL(url).searchParams.forEach((v,k) => { if(k.startsWith('utm_')) p[k]=v; }); } catch(e){}
+  return p;
+}
+
+async function saveToLog(rowsJson, btn) {
+  btn.classList.add('saving');
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving...';
+  try {
+    const rows = JSON.parse(rowsJson);
+    await fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(rows) });
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved to log!';
+    setTimeout(() => {
+      btn.classList.remove('saved');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d=\'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\'/><polyline points=\'17 21 17 13 7 13 7 21\'/><polyline points=\'7 3 7 8 15 8\'/></svg> Save to UTM log';
+    }, 3000);
+  } catch(err) {
+    btn.classList.remove('saving');
+    btn.textContent = 'Error — try again';
+    setTimeout(() => { btn.textContent = 'Save to UTM log'; }, 3000);
+  }
+}
+
+function buildSection(title, rows, logMeta) {
   const allURLs = rows.map(r => r.url).join('\n');
+  const logRows = rows.map(r => {
+    const p = parseUTMParams(r.url);
+    return {
+      date: new Date().toLocaleString('en-GB').replace(',',''),
+      eventName: (logMeta && logMeta.eventName) || '',
+      source: p.utm_source || '',
+      medium: p.utm_medium || '',
+      campaign: p.utm_campaign || '',
+      term: p.utm_term || '',
+      url: r.url
+    };
+  });
+  const logData = JSON.stringify(logRows).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/'/g,"\\'");
   return `<div class="out-card">
     <div class="out-card-head">
       <div class="out-card-dot"></div>
@@ -615,6 +660,7 @@ function buildSection(title, rows) {
     <div class="out-body">${rows.map(r => urlRow(r.chip, r.url)).join('')}</div>
     <div class="copy-all-row">
       <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
+      <button class="btn-save-log" onclick="saveToLog('${logData}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
     </div>
   </div>`;
 }
@@ -634,22 +680,22 @@ function generate() {
   const reps = ['Deonte','Kee','Dustin','Orly','Greg','Lalon'];
 
   sections.push(buildSection('Marketing email (HubSpot)',
-    ['e1','e2','e3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) }))));
+    ['e1','e2','e3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) })), {eventName: name}));
 
   if (state.bdr)
     sections.push(buildSection('BDR emails',
-      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=bdr&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) }))));
+      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=bdr&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) })), {eventName: name}));
 
   if (state.sales)
     sections.push(buildSection('Sales emails',
-      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=sales&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) }))));
+      reps.map(r => ({ chip: r, url: buildURL(page, `utm_source=sales&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${r}`) })), {eventName: name}));
 
   if (state.hp)
     sections.push(buildSection('Health plan emails (HubSpot)',
-      ['hp1','hp2','hp3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) }))));
+      ['hp1','hp2','hp3'].map(t => ({ chip: t, url: buildURL(page, `utm_source=hubspot&utm_medium=email&utm_campaign=${enc(campaign)}&utm_term=${t}`) })), {eventName: name}));
 
   sections.push(buildSection('LinkedIn',
-    ['event_page','organic'].map(m => ({ chip: m, url: buildURL(page, `utm_source=linkedin&utm_medium=${m}&utm_campaign=${enc(campaign)}`) }))));
+    ['event_page','organic'].map(m => ({ chip: m, url: buildURL(page, `utm_source=linkedin&utm_medium=${m}&utm_campaign=${enc(campaign)}`) })), {eventName: name}));
 
   const others = [];
   if (state.hosp) others.push({ chip: 'hospitology', src: 'hospitology' });
@@ -660,7 +706,7 @@ function generate() {
   }
   if (others.length)
     sections.push(buildSection('Other sources',
-      others.map(o => ({ chip: o.chip, url: buildURL(page, `utm_source=${enc(o.src)}&utm_medium=email&utm_campaign=${enc(campaign)}`) }))));
+      others.map(o => ({ chip: o.chip, url: buildURL(page, `utm_source=${enc(o.src)}&utm_medium=email&utm_campaign=${enc(campaign)}`) })), {eventName: name}));
 
   document.getElementById('outputSections').innerHTML = sections.join('');
   const out = document.getElementById('outputArea');
@@ -825,21 +871,21 @@ function generateDigital() {
   const utmStr = paramsToString(utmParams);
   if (utmStr) {
     const url = buildURL(page, utmStr);
-    sections.push(dmSection('UTM parameters', [{ chip: 'UTM URL', url }]));
+    sections.push(dmSection('UTM parameters', [{ chip: 'UTM URL', url }], src.desc));
   }
 
   // td_ tracking params
   const tdStr = paramsToString(tdParams);
   if (tdStr) {
     const url = buildURL(page, Object.entries({...utmParams, ...tdParams}).map(([k,v]) => `${k}=${v}`).join('&'));
-    sections.push(dmSection('Full URL with td_ tracking', [{ chip: 'Full URL', url }]));
+    sections.push(dmSection('Full URL with td_ tracking', [{ chip: 'Full URL', url }], src.desc));
   }
 
   // hsa_ params (HubSpot / HS Ads)
   const hsaStr = paramsToString(hsaParams);
   if (hsaStr) {
     const url = buildURL(page, Object.entries({...utmParams, ...hsaParams}).map(([k,v]) => `${k}=${v}`).join('&'));
-    sections.push(dmSection('Full URL with hsa_ tracking', [{ chip: 'HSA URL', url }]));
+    sections.push(dmSection('Full URL with hsa_ tracking', [{ chip: 'HSA URL', url }], src.desc));
   }
 
   document.getElementById('dmOutputSections').innerHTML = sections.join('');
@@ -848,8 +894,21 @@ function generateDigital() {
   setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-function dmSection(title, rows) {
+function dmSection(title, rows, sourceDesc) {
   const allURLs = rows.map(r => r.url).join('\n');
+  const logRows = rows.map(r => {
+    const p = parseUTMParams(r.url);
+    return {
+      date: new Date().toLocaleString('en-GB').replace(',',''),
+      eventName: sourceDesc || '',
+      source: p.utm_source || '',
+      medium: p.utm_medium || '',
+      campaign: p.utm_campaign || '',
+      term: p.utm_term || '',
+      url: r.url
+    };
+  });
+  const logData = JSON.stringify(logRows).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/'/g,"\\'");
   const rowsHtml = rows.map(r => {
     const safe = r.url.replace(/'/g, "\\'");
     const highlighted = r.url.replace(/((?:utm|td|hsa)_[^=&]+=[^&]+)/g, (m) => {
@@ -875,6 +934,7 @@ function dmSection(title, rows) {
     <div class="out-body">${rowsHtml}</div>
     <div class="copy-all-row">
       <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
+      <button class="btn-save-log" onclick="saveToLog('${logData}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
     </div>
   </div>`;
 }
