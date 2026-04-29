@@ -616,24 +616,30 @@ function parseUTMParams(url) {
   return p;
 }
 
-async function saveToLog(rowsJson, btn) {
+function saveToLog(rowsJson, btn) {
   btn.classList.add('saving');
-  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving...';
-  try {
-    const rows = JSON.parse(rowsJson);
-    await fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(rows) });
-    btn.classList.remove('saving');
-    btn.classList.add('saved');
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved to log!';
-    setTimeout(() => {
-      btn.classList.remove('saved');
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d=\'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\'/><polyline points=\'17 21 17 13 7 13 7 21\'/><polyline points=\'7 3 7 8 15 8\'/></svg> Save to UTM log';
-    }, 3000);
-  } catch(err) {
-    btn.classList.remove('saving');
-    btn.textContent = 'Error — try again';
-    setTimeout(() => { btn.textContent = 'Save to UTM log'; }, 3000);
-  }
+  btn.textContent = 'Saving...';
+  const rows = JSON.parse(rowsJson);
+
+  // Google Apps Script requires no-cors with form data to avoid CORS preflight blocking
+  const form = new FormData();
+  form.append('data', JSON.stringify(rows));
+
+  fetch(WEBHOOK_URL, { method: 'POST', body: form, mode: 'no-cors' })
+    .then(() => {
+      btn.classList.remove('saving');
+      btn.classList.add('saved');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved to log!';
+      setTimeout(() => {
+        btn.classList.remove('saved');
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d=\'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\'/><polyline points=\'17 21 17 13 7 13 7 21\'/><polyline points=\'7 3 7 8 15 8\'/></svg> Save to UTM log';
+      }, 3000);
+    })
+    .catch(() => {
+      btn.classList.remove('saving');
+      btn.textContent = 'Error — try again';
+      setTimeout(() => { btn.textContent = 'Save to UTM log'; }, 3000);
+    });
 }
 
 function buildSection(title, rows, logMeta) {
