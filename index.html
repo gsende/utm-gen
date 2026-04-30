@@ -608,7 +608,10 @@ function urlRow(chip, url) {
   </div>`;
 }
 
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzAZiqC_Y-O6jJpzxBvYBzIrdm8wFJuyEZR1ODJrKEmpQQ6eyJ3seNd6nKbzQdtvD1umA/exec';
+const LOG_STORE = {};
+let logStoreIdx = 0;
+
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyEUnIftJ_5IxIYCepWzjCgCji2fAZftgJNjhY5L6xESkEg3uhpQ7VX4QtYh5Zoj861GA/exec';
 
 function parseUTMParams(url) {
   const p = {};
@@ -616,30 +619,36 @@ function parseUTMParams(url) {
   return p;
 }
 
-function saveToLog(rowsJson, btn) {
+function saveToLog(storeKey, btn) {
+  const rows = LOG_STORE[storeKey];
+  if (!rows) { console.error('No log data for key', storeKey); return; }
+
   btn.classList.add('saving');
   btn.textContent = 'Saving...';
-  const rows = JSON.parse(rowsJson);
 
-  // Google Apps Script requires no-cors with form data to avoid CORS preflight blocking
-  const form = new FormData();
-  form.append('data', JSON.stringify(rows));
+  const script = document.createElement('script');
+  const cbName = 'utmCb_' + Date.now();
+  const url = WEBHOOK_URL + '?data=' + encodeURIComponent(JSON.stringify(rows)) + '&callback=' + cbName;
 
-  fetch(WEBHOOK_URL, { method: 'POST', body: form, mode: 'no-cors' })
-    .then(() => {
-      btn.classList.remove('saving');
-      btn.classList.add('saved');
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved to log!';
-      setTimeout(() => {
-        btn.classList.remove('saved');
-        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d=\'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\'/><polyline points=\'17 21 17 13 7 13 7 21\'/><polyline points=\'7 3 7 8 15 8\'/></svg> Save to UTM log';
-      }, 3000);
-    })
-    .catch(() => {
-      btn.classList.remove('saving');
-      btn.textContent = 'Error — try again';
-      setTimeout(() => { btn.textContent = 'Save to UTM log'; }, 3000);
-    });
+  const timer = setTimeout(() => { done(); }, 5000);
+
+  window[cbName] = function() { clearTimeout(timer); done(); };
+
+  function done() {
+    if (script.parentNode) script.parentNode.removeChild(script);
+    delete window[cbName];
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved to log!';
+    setTimeout(() => {
+      btn.classList.remove('saved');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d=\'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\'/><polyline points=\'17 21 17 13 7 13 7 21\'/><polyline points=\'7 3 7 8 15 8\'/></svg> Save to UTM log';
+    }, 3000);
+  }
+
+  script.onerror = function() { clearTimeout(timer); done(); };
+  script.src = url;
+  document.body.appendChild(script);
 }
 
 function buildSection(title, rows, logMeta) {
@@ -656,7 +665,8 @@ function buildSection(title, rows, logMeta) {
       url: r.url
     };
   });
-  const logData = JSON.stringify(logRows).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/'/g,"\\'");
+  const storeKey = 'log_' + (logStoreIdx++);
+  LOG_STORE[storeKey] = logRows;
   return `<div class="out-card">
     <div class="out-card-head">
       <div class="out-card-dot"></div>
@@ -666,7 +676,7 @@ function buildSection(title, rows, logMeta) {
     <div class="out-body">${rows.map(r => urlRow(r.chip, r.url)).join('')}</div>
     <div class="copy-all-row">
       <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
-      <button class="btn-save-log" onclick="saveToLog('${logData}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
+      <button class="btn-save-log" onclick="saveToLog('${storeKey}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
     </div>
   </div>`;
 }
@@ -914,7 +924,8 @@ function dmSection(title, rows, sourceDesc) {
       url: r.url
     };
   });
-  const logData = JSON.stringify(logRows).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/'/g,"\\'");
+  const storeKey = 'log_' + (logStoreIdx++);
+  LOG_STORE[storeKey] = logRows;
   const rowsHtml = rows.map(r => {
     const safe = r.url.replace(/'/g, "\\'");
     const highlighted = r.url.replace(/((?:utm|td|hsa)_[^=&]+=[^&]+)/g, (m) => {
@@ -940,7 +951,7 @@ function dmSection(title, rows, sourceDesc) {
     <div class="out-body">${rowsHtml}</div>
     <div class="copy-all-row">
       <button class="btn-copy-all" onclick="copyText(\`${allURLs.replace(/`/g,'\\`').replace(/'/g,"\\'")}\`, this)">Copy all</button>
-      <button class="btn-save-log" onclick="saveToLog('${logData}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
+      <button class="btn-save-log" onclick="saveToLog('${storeKey}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
     </div>
   </div>`;
 }
