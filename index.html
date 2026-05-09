@@ -475,7 +475,7 @@
           <select id="ooCampaignType">
             <option value="">Select type...</option>
             <option value="pr">PR</option>
-            <option value="content">Content</option>
+            <option value="c">Content</option>
             <option value="other">Other</option>
           </select>
         </div>
@@ -827,15 +827,20 @@ function saveAllToLog(sectionContainerId, btn) {
 function buildSection(title, rows, logMeta) {
   const allURLs = rows.map(r => r.url).join('\n');
   const logRows = rows.map(r => {
-    const p = parseUTMParams(r.url);
+    // Parse from URL — searchParams handles decoding reliably
+    let p = {};
+    try {
+      const fullUrl = r.url.startsWith('http') ? r.url : 'https://x.com/' + r.url;
+      new URL(fullUrl).searchParams.forEach((v, k) => { p[k] = v; });
+    } catch(e) {}
     return {
-      date: new Date().toLocaleString('en-GB').replace(',',''),
+      date:      new Date().toLocaleString('en-GB').replace(',', ''),
       eventName: (logMeta && logMeta.eventName) || '',
-      source: p.utm_source || '',
-      medium: p.utm_medium || '',
-      campaign: p.utm_campaign || '',
-      term: p.utm_term || '',
-      url: r.url
+      source:    p.utm_source   || '',
+      medium:    p.utm_medium   || '',
+      campaign:  p.utm_campaign || '',
+      term:      p.utm_term     || '',
+      url:       r.url
     };
   });
   const storeKey = 'log_' + (logStoreIdx++);
