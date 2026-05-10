@@ -765,9 +765,12 @@ function parseUTMParams(url) {
 }
 
 function webhookSend(rows, onDone) {
+  // Log to console for debugging
+  console.log('[UTM Logger] Sending rows:', JSON.stringify(rows, null, 2));
   // URLSearchParams is the only body type browsers allow in no-cors mode.
   // Send one fetch per row so Zapier gets clean flat fields for each.
   const sends = rows.map(function(row) {
+    console.log('[UTM Logger] Row:', row);
     const params = new URLSearchParams();
     params.append('date',       row.date      || '');
     params.append('event_name', row.eventName || '');
@@ -776,6 +779,7 @@ function webhookSend(rows, onDone) {
     params.append('campaign',   row.campaign  || '');
     params.append('term',       row.term      || '');
     params.append('url',        row.url       || '');
+    console.log('[UTM Logger] Params string:', params.toString());
     return fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', body: params });
   });
   Promise.all(sends).then(function() { onDone(); }).catch(function() { onDone(); });
