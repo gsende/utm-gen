@@ -379,6 +379,20 @@
         </div>
       </div>
 
+      <div class="tool-card teal" onclick="goTo('custom')" style="animation-delay:0.21s;">
+        <div class="tool-icon teal">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="tool-name">Build your own</div>
+          <div class="tool-desc">Manually create UTM links with custom source, medium, campaign, and term parameters.</div>
+        </div>
+        <div class="tool-arrow teal">
+          Open tool
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -525,6 +539,17 @@
             <div class="toggle-src">utm_source=sales</div>
           </div>
         </div>
+        <div class="toggle-item" id="oo-tog-other" onclick="ooToggle('other')">
+          <div class="pill" id="oo-pill-other"><div class="pill-knob"></div></div>
+          <div>
+            <div class="toggle-name">Other</div>
+            <div class="toggle-src">Custom source</div>
+          </div>
+        </div>
+      </div>
+      <div id="oo-other-field" class="field" style="display:none; margin-top:1rem;">
+        <label class="field-label" for="ooOtherSource">Custom source name</label>
+        <input type="text" id="ooOtherSource" placeholder="e.g. slack, demo, referral, etc.">
       </div>
     </div>
 
@@ -690,6 +715,64 @@
   </main>
 </div>
 
+<!-- BUILD YOUR OWN -->
+<div class="view" id="view-custom">
+  <main class="utm-page">
+    <div class="hero">
+      <div class="hero-eyebrow">Custom UTM Builder</div>
+      <h1>Build <span>your own</span> UTM link</h1>
+      <p class="hero-sub">Manually enter UTM parameters and generate a tracking link instantly.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+        </div>
+        <div>
+          <div class="card-title">UTM parameters</div>
+          <div class="card-sub">Fill in any parameters you want to include</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label" for="customLandingPage">Landing page URL <span>*</span></label>
+          <input type="text" id="customLandingPage" placeholder="https://navina.ai/page">
+        </div>
+        <div class="field">
+          <label class="field-label" for="customSource">utm_source</label>
+          <input type="text" id="customSource" placeholder="e.g. facebook, linkedin, email">
+        </div>
+        <div class="field">
+          <label class="field-label" for="customMedium">utm_medium</label>
+          <input type="text" id="customMedium" placeholder="e.g. paid_media, social, email">
+        </div>
+        <div class="field">
+          <label class="field-label" for="customCampaign">utm_campaign</label>
+          <input type="text" id="customCampaign" placeholder="e.g. summer-sale, q4-launch">
+        </div>
+        <div class="field">
+          <label class="field-label" for="customTerm">utm_term</label>
+          <input type="text" id="customTerm" placeholder="e.g. keyword, audience, segment">
+        </div>
+        <div class="field">
+          <label class="field-label" for="customContent">utm_content</label>
+          <input type="text" id="customContent" placeholder="e.g. button-text, image-name">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="generateCustom()">
+      <svg viewBox="0 0 24 24"><polyline points="13 2 13 9 20 9"/><polygon points="22 12 13 2 2 2 2 22 22 22 22 12"/></svg>
+      Generate UTM URL
+    </button>
+
+    <div id="customOutputArea" style="display:none; margin-top:2rem; animation: fadeUp 0.4s ease both;">
+      <div id="customOutputSections"></div>
+    </div>
+  </main>
+</div>
+
 <footer>
   Built for <a href="https://navina.ai" target="_blank">Navina</a> marketing team &middot; Navina UTM Builder
 </footer>
@@ -699,7 +782,7 @@
 function goTo(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
-  const labels = { events: 'Campaign Marketing', digital: 'Digital Marketing', oneoffs: 'One-offs' };
+  const labels = { events: 'Campaign Marketing', digital: 'Digital Marketing', oneoffs: 'One-offs', custom: 'Build your own' };
   document.getElementById('navSep').style.display = 'inline';
   const lbl = document.getElementById('navLabel');
   lbl.textContent = labels[view] || '';
@@ -864,12 +947,13 @@ function buildSection(title, rows, logMeta) {
 }
 
 /* ---- ONE-OFFS ---- */
-const ooState = { mkt: false, li: false, bdr: false, sales: false };
+const ooState = { mkt: false, li: false, bdr: false, sales: false, other: false };
 
 function ooToggle(key) {
   ooState[key] = !ooState[key];
   document.getElementById('oo-pill-' + key).classList.toggle('on', ooState[key]);
   document.getElementById('oo-tog-' + key).classList.toggle('active', ooState[key]);
+  if (key === 'other') document.getElementById('oo-other-field').style.display = ooState[key] ? 'block' : 'none';
 }
 
 function generateOneOffs() {
@@ -879,7 +963,7 @@ function generateOneOffs() {
   const page     = document.getElementById('ooLandingPage').value.trim();
 
   if (!name || !date || !type || !page) { alert('Please fill in all required fields.'); return; }
-  if (!ooState.mkt && !ooState.li && !ooState.bdr && !ooState.sales) { alert('Please toggle at least one channel.'); return; }
+  if (!ooState.mkt && !ooState.li && !ooState.bdr && !ooState.sales && !ooState.other) { alert('Please toggle at least one channel.'); return; }
 
   const campaign = type === 'other' ? `${name}_${date}` : `${name}_${type}_${date}`;
   document.getElementById('ooCampaignPreview').textContent = campaign;
@@ -908,9 +992,85 @@ function generateOneOffs() {
       [{ chip: 'Sales', url: buildURL(page, `utm_source=sales&utm_medium=email&utm_campaign=${enc(campaign)}`) }],
       { eventName: name }));
 
+  if (ooState.other) {
+    const custom = document.getElementById('ooOtherSource').value.trim().replace(/\s+/g, '-').toLowerCase();
+    if (custom) {
+      sections.push(buildSection('Other',
+        [{ chip: custom, url: buildURL(page, `utm_source=${enc(custom)}&utm_medium=email&utm_campaign=${enc(campaign)}`) }],
+        { eventName: name }));
+    }
+  }
+
   document.getElementById('ooOutputSections').innerHTML = sections.join('');
   document.getElementById('ooSaveAllWrap').style.display = sections.length ? 'block' : 'none';
   const out = document.getElementById('ooOutputArea');
+  out.style.display = 'block';
+  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function generateCustom() {
+  const page = document.getElementById('customLandingPage').value.trim();
+  if (!page) { alert('Please enter a landing page URL.'); return; }
+
+  const source = document.getElementById('customSource').value.trim().toLowerCase();
+  const medium = document.getElementById('customMedium').value.trim().toLowerCase();
+  const campaign = document.getElementById('customCampaign').value.trim().toLowerCase();
+  const term = document.getElementById('customTerm').value.trim().toLowerCase();
+  const content = document.getElementById('customContent').value.trim().toLowerCase();
+
+  // Build parameter string
+  const params = [];
+  if (source) params.push(`utm_source=${enc(source)}`);
+  if (medium) params.push(`utm_medium=${enc(medium)}`);
+  if (campaign) params.push(`utm_campaign=${enc(campaign)}`);
+  if (term) params.push(`utm_term=${enc(term)}`);
+  if (content) params.push(`utm_content=${enc(content)}`);
+
+  if (params.length === 0) { alert('Please enter at least one UTM parameter.'); return; }
+
+  const url = buildURL(page, params.join('&'));
+  
+  // Build log data
+  const logRows = [{
+    date: new Date().toLocaleString('en-GB').replace(',', ''),
+    eventName: 'custom-utm',
+    source: source || '',
+    medium: medium || '',
+    campaign: campaign || '',
+    term: term || '',
+    url: url
+  }];
+  
+  const storeKey = 'log_' + (logStoreIdx++);
+  LOG_STORE[storeKey] = logRows;
+
+  const highlighted = url.replace(/(utm_[^=&]+=[^&]+)/g, (m) => {
+    const [k, v] = m.split('=');
+    return `<span style="color:var(--gray-400);">${k}</span>=<span style="color:var(--gray-900);font-weight:500;">${v}</span>`;
+  });
+
+  const output = `
+    <div class="out-card">
+      <div class="out-card-head">
+        <div class="out-card-dot"></div>
+        <div class="out-card-title">Your custom UTM link</div>
+      </div>
+      <div class="out-body">
+        <div class="url-row">
+          <span class="url-chip">URL</span>
+          <span class="url-text" style="font-size:11px;">${highlighted}</span>
+          <button class="copy-btn" onclick="copyText('${url.replace(/'/g,"\\'")}', this)">Copy</button>
+        </div>
+      </div>
+      <div class="copy-all-row">
+        <button class="btn-copy-all" onclick="copyText('${url.replace(/'/g,"\\'")}', this)">Copy URL</button>
+        <button class="btn-save-log" onclick="saveToLog('${storeKey}', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/><polyline points='17 21 17 13 7 13 7 21'/><polyline points='7 3 7 8 15 8'/></svg> Save to UTM log</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('customOutputSections').innerHTML = output;
+  const out = document.getElementById('customOutputArea');
   out.style.display = 'block';
   setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
